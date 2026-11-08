@@ -1,0 +1,30 @@
+# Two Keycloaks talking SAML:
+#   corp-idp (http://localhost:8180) = the company login, the SAML Identity Provider
+#   app-sp   (http://localhost:8280) = the app, the SAML Service Provider (brokers to corp-idp)
+# Lab only: dev mode, admin/admin, fake users. Not for production.
+services:
+  corp-idp:
+    image: quay.io/keycloak/keycloak:26.8.2
+    command: start-dev --import-realm
+    environment:
+      KC_HOSTNAME: http://localhost:8180
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "127.0.0.1:8180:8080"
+    volumes:
+      - ./realms/corp:/opt/keycloak/data/import:ro
+
+  app-sp:
+    image: quay.io/keycloak/keycloak:26.8.2
+    command: start-dev --import-realm
+    environment:
+      KC_HOSTNAME: http://localhost:8280
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "127.0.0.1:8280:8080"
+    volumes:
+      - ./realms/app:/opt/keycloak/data/import:ro
+    depends_on:
+      - corp-idp
